@@ -166,18 +166,63 @@ cc_prebuilt_library_shared {
     relative_install_path: "extractors",
 }
 
-cc_prebuilt_library_shared {
-    name: "libamnuplayer",
-    system_ext_specific: true,
-    defaults: ["avenhancements_amnuplayer_go_defaults"],
-    check_elf_files: false,
+soong_config_module_type {
+    name: "amnuplayer_cc_prebuilt_library_shared",
+    module_type: "cc_prebuilt_library_shared",
+    config_namespace: "amlogic_vendorconfig",
+    variables: [
+        "board_compile_version",
+    ],
+    properties: [
+        "srcs",
+        "defaults",
+    ],
+}
 
+soong_config_string_variable {
+    name: "board_compile_version",
+    values: [
+        "aosp",
+        "atv",
+    ],
+}
+
+cc_defaults {
+    name: "amnuplayer_aosp_defaults",
+    arch: {
+        arm: {
+            srcs: ["aosp/lib/libamnuplayer.so"],
+        },
+        arm64: {
+            srcs: ["aosp/lib64/libamnuplayer.so"],
+        },
+    },
+}
+
+cc_defaults {
+    name: "amnuplayer_defaults",
     arch: {
         arm: {
             srcs: ["lib/libamnuplayer.so"],
         },
         arm64: {
             srcs: ["lib64/libamnuplayer.so"],
+        },
+    },
+}
+amnuplayer_cc_prebuilt_library_shared {
+    name: "libamnuplayer",
+    system_ext_specific: true,
+    defaults: ["avenhancements_amnuplayer_go_defaults"],
+    check_elf_files: false,
+    soong_config_variables: {
+        board_compile_version: {
+            aosp: {
+                defaults: ["amnuplayer_aosp_defaults"],
+            },
+            conditions_default: {
+                defaults: ["amnuplayer_defaults"],
+            },
         },
     },
     shared_libs: [
@@ -209,7 +254,13 @@ cc_prebuilt_library_shared {
         "libstagefright",
         "libstagefright_foundation",
         "libutils",
-
+        "libvideotunnel",
+        "libamgralloc_ext",
+        "libmediahal_videodec.system",
+        "libmediahal_dmabufmanage.system",
+        "libmediaproxy_producer.system",
+        "libmediaproxy_consumer.system",
+        "libmediahal_mediametrics.system",
     ],
 
 }
